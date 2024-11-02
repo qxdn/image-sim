@@ -11,15 +11,15 @@ import (
 
 func TestHash(t *testing.T) {
 	// 读图
-	demo1, err1 := util.ReadImage("../demo/demo1.jpg")
-	demo2, err2 := util.ReadImage("../demo/demo2.jpg")
+	demo1, err1 := util.ReadImageFromPath("../demo/demo1.jpg")
+	demo2, err2 := util.ReadImageFromPath("../demo/demo2.jpg")
 	if err := errors.Join(err1, err2); err != nil {
 		t.Errorf("ReadImage error:%v", err)
 		return
 	}
 	// 算hash
-	hash1, err1 := model.ComputeHashes(&demo1)
-	hash2, err2 := model.ComputeHashes(&demo2)
+	hash1, err1 := model.ComputeHashes(demo1)
+	hash2, err2 := model.ComputeHashes(demo2)
 	if err := errors.Join(err1, err2); err != nil {
 		t.Errorf("ComputeHashes error:%v", err)
 		return

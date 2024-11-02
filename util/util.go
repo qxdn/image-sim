@@ -2,11 +2,8 @@ package util
 
 import (
 	"image"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
+
 	"math/bits"
-	"os"
 
 	"github.com/corona10/goimagehash"
 )
@@ -57,14 +54,4 @@ func HashDistance(hash1, hash2 uint64) int {
 	// 汉明距离
 	hamming := hash1 ^ hash2
 	return bits.OnesCount64(hamming)
-}
-
-func ReadImage(path string) (image.Image, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	img, _, err := image.Decode(f)
-	return img, err
 }

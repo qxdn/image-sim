@@ -5,5 +5,5 @@
 
 # TODO
 
-- [ ] 接入OSS SDK
+- [x] 接入OSS SDK
 - [ ] 存储hash值到数据库

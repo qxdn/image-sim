@@ -21,6 +21,7 @@ type OSSObject struct {
 	Key          string    // Object key
 	Filename     string    // Object filename
 	LastModified time.Time // Object last modified time
+	Url          string    // download url
 }
 
 /**
@@ -85,9 +86,10 @@ func OSSListObject(client *oss.Client, buckName, directory string) (*[]OSSObject
 			}
 			objs := OSSObject{
 				BuckName:     buckName,
-				Key:          oss.ToString(obj.Key),
+				Key:          key,
 				Filename:     ExtractOSSFilename(key),
 				LastModified: lastModified,
+				Url:          GetDownloadLink(key),
 			}
 			objects = append(objects, objs)
 		}
@@ -109,4 +111,17 @@ func ExtractOSSFilename(path string) string {
 		return ""
 	}
 	return s[len(s)-1]
+}
+
+func GetDownloadLink(key string) string {
+	// 从key中获取下载地址
+	customUrl := global.AppConfig.OSS.CustomUrl
+	if customUrl == "" {
+		return ""
+	}
+	// 拼接下载地址
+	if customUrl[len(customUrl)-1] != '/' {
+		customUrl += "/"
+	}
+	return customUrl + key
 }

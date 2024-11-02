@@ -1,0 +1,10 @@
+oss:
+  region: ""
+  bucketName: ""
+  directory: ""
+  accessKey: ""
+  secretKey: ""
+  customUrl: ""
+
+db:
+  dsn: ""

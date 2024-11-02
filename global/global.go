@@ -3,8 +3,12 @@ package global
 import (
 	"runtime"
 
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type Config struct {
@@ -33,6 +37,8 @@ type Refresh struct {
 var ZapLogger *zap.Logger
 var Logger *zap.SugaredLogger
 var AppConfig Config
+var Db *gorm.DB
+var OSSClient *oss.Client
 
 func init() {
 	ZapLogger, _ = zap.NewProduction()
@@ -59,4 +65,20 @@ func ReadConfig() *Config {
 		AppConfig.Refresh.WorkerNum = numCPU
 	}
 	return &AppConfig
+}
+
+func InitGlobal() {
+	config := ReadConfig()
+	db, err := gorm.Open(mysql.Open(config.DB.DSN), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	Db = db
+
+	cfg := oss.LoadDefaultConfig().
+		WithCredentialsProvider(credentials.NewStaticCredentialsProvider(config.OSS.AccessKey, config.OSS.SecretKey)).
+		WithRegion(config.OSS.Region)
+
+	client := oss.NewClient(cfg)
+	OSSClient = client
 }

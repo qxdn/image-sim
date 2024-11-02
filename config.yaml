@@ -8,3 +8,6 @@ oss:
 
 db:
   dsn: ""
+
+refresh:
+  workerNum: 40

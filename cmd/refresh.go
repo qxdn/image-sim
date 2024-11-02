@@ -51,10 +51,13 @@ func main() {
 		global.Logger.Errorf("OSSListObject error:%v", err)
 		return
 	}
+	glimiter := model.NewGlimiter(config.Refresh.WorkerNum)
 	var wg sync.WaitGroup
 	for _, obj := range *objects {
 		wg.Add(1)
-		go task(&obj, client, db, &wg)
+		glimiter.Run(func() {
+			task(&obj, client, db, &wg)
+		})
 	}
 	wg.Wait()
 }

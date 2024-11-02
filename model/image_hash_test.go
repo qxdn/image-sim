@@ -1,10 +1,11 @@
-package model
+package model_test
 
 import (
 	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/qxdn/imagesim/model"
 	"github.com/qxdn/imagesim/util"
 )
 
@@ -17,8 +18,8 @@ func TestHash(t *testing.T) {
 		return
 	}
 	// 算hash
-	hash1, err1 := ComputeHashes(&demo1)
-	hash2, err2 := ComputeHashes(&demo2)
+	hash1, err1 := model.ComputeHashes(&demo1)
+	hash2, err2 := model.ComputeHashes(&demo2)
 	if err := errors.Join(err1, err2); err != nil {
 		t.Errorf("ComputeHashes error:%v", err)
 		return

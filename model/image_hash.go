@@ -12,6 +12,12 @@ type ImageHash struct {
 	PHash uint64 // Perception hash
 }
 
+/**
+ * @Function: ComputeHashes
+ * @Description: Compute all hashes of the image.
+ * @Param: img *image.Image
+ * @Return: *ImageHash, error
+ **/
 func ComputeHashes(img *image.Image) (*ImageHash, error) {
 	hash := &ImageHash{}
 	err := hash.ComputeHashes(img)

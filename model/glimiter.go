@@ -15,8 +15,10 @@ func NewGlimiter(size int) *GLimiter {
 
 func (g *GLimiter) Run(fc func()) {
 	g.ch <- struct{}{}
-	defer func() {
-		<-g.ch
+	go func() {
+		defer func() {
+			<-g.ch
+		}()
+		fc()
 	}()
-	go fc()
 }

@@ -55,3 +55,13 @@ func HashDistance(hash1, hash2 uint64) int {
 	hamming := hash1 ^ hash2
 	return bits.OnesCount64(hamming)
 }
+
+func computeSimilar(distance int) float64 {
+	// 计算相似度
+	return 1.0 - float64(distance)/64.0
+}
+
+func ComputeSimilarity(hash1, hash2 uint64) float64 {
+	distance := HashDistance(hash1, hash2)
+	return computeSimilar(distance)
+}

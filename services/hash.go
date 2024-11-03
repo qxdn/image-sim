@@ -1,14 +1,11 @@
 package services
 
 import (
-	"errors"
-
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/qxdn/imagesim/dal"
 	"github.com/qxdn/imagesim/global"
 	"github.com/qxdn/imagesim/model"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 /**
@@ -27,7 +24,7 @@ func ComputeSingle(object *model.OSSObject, client *oss.Client, db *gorm.DB) err
 		global.Logger.Info("Image found with key:", object.Key)
 		if dbImage.LastModified.Before(object.LastModified) {
 			// 需要更新数据库
-			global.Logger.Infof("Image with key %v LastModified has changed need update", object.Key)
+			global.Logger.Infof("Image with key %v LastModified has changed need update, db time: %v, oss time: %v", object.Key, dbImage.LastModified, object.LastModified)
 			needSave = true
 		}
 	}
@@ -50,44 +47,6 @@ func ComputeSingle(object *model.OSSObject, client *oss.Client, db *gorm.DB) err
 	return nil
 }
 
-/**
- * @Function: LoadImageFromDB
- * @Description: Load image from database
- * @Param: db *gorm.DB, key string
- * @Return: *dal.Image
- **/
-func LoadImageFromDB(db *gorm.DB, key string) *dal.Image {
-	image := &dal.Image{}
-	result := db.Where(&dal.Image{Key: key}).First(image)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil
-	}
-	return image
-}
-
-/**
- * @Function: LoadImageFromDBWithLock
- * @Description: Load image from database with lock
- * @Param: db *gorm.DB, key string
- * @Return: *dal.Image
- **/
-func LoadImageFromDBWithLock(db *gorm.DB, key string) *dal.Image {
-	image := &dal.Image{}
-	result := db.Clauses(clause.Locking{
-		Strength: "UPDATE",
-		Options:  "NOWAIT",
-	}).Where(&dal.Image{Key: key}).First(image)
-	err := result.Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil
-	}
-	if err != nil {
-		// 可能是并发
-		panic(err)
-	}
-	return image
-}
-
 func CreateDBImage(image *dal.Image, object *model.OSSObject, hash *model.ImageHash) *dal.Image {
 	if image == nil {
 		image = &dal.Image{}
@@ -100,11 +59,6 @@ func CreateDBImage(image *dal.Image, object *model.OSSObject, hash *model.ImageH
 	image.Url = object.Url
 	image.LastModified = object.LastModified
 	return image
-}
-
-func SaveDBImage(image *dal.Image, db *gorm.DB) error {
-	result := db.Save(image)
-	return result.Error
 }
 
 func ComputeOSSHash(object *model.OSSObject, client *oss.Client) (*model.ImageHash, error) {

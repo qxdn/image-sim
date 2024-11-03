@@ -15,6 +15,7 @@ type Config struct {
 	OSS     OSSConfig `json:"oss" yaml:"oss"`
 	DB      DB        `json:"db" yaml:"db"`
 	Refresh Refresh   `json:"refresh" yaml:"refresh"`
+	Query   Query     `json:"query" yaml:"query"`
 }
 
 type OSSConfig struct {
@@ -27,11 +28,18 @@ type OSSConfig struct {
 }
 
 type DB struct {
-	DSN string `json:"dsn" yaml:"dsn"`
+	DSN          string `json:"dsn" yaml:"dsn"`
+	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`
+	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`
 }
 
 type Refresh struct {
 	WorkerNum int `json:"workerNum" yaml:"workerNum"` // Number of concurrent workers if <=0 use cpu num
+}
+
+type Query struct {
+	WorkerNum int `json:"workerNum" yaml:"workerNum"` // Number of concurrent workers if <=0 use cpu num
+	Distance  int `json:"distance" yaml:"distance"`   // Distance threshold
 }
 
 var ZapLogger *zap.Logger
@@ -54,6 +62,8 @@ func ReadConfig() *Config {
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
 	viper.SetDefault("refresh.workerNum", numCPU)
+	viper.SetDefault("query.workerNum", numCPU)
+	viper.SetDefault("query.distance", 5)
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}
@@ -64,6 +74,13 @@ func ReadConfig() *Config {
 		// Use the number of CPUs as the default number of workers
 		AppConfig.Refresh.WorkerNum = numCPU
 	}
+	if AppConfig.Query.WorkerNum <= 0 {
+		// Use the number of CPUs as the default number of workers
+		AppConfig.Query.WorkerNum = numCPU
+	}
+	if AppConfig.Query.Distance <= 0 {
+		AppConfig.Query.Distance = 0
+	}
 	return &AppConfig
 }
 
@@ -73,6 +90,9 @@ func InitGlobal() {
 	if err != nil {
 		panic("failed to connect database")
 	}
+	sqlDB, _ := db.DB()
+	sqlDB.SetMaxIdleConns(AppConfig.DB.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(AppConfig.DB.MaxOpenConns)
 	Db = db
 
 	cfg := oss.LoadDefaultConfig().

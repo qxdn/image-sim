@@ -47,10 +47,10 @@ func main() {
 	}
 	glimiter := model.NewGlimiter(config.Refresh.WorkerNum)
 	var wg sync.WaitGroup
-	for _, obj := range *objects {
+	for _, obj := range objects {
 		wg.Add(1)
 		glimiter.Run(func() {
-			task(&obj, client, db, &wg)
+			task(obj, client, db, &wg)
 		})
 	}
 	wg.Wait()

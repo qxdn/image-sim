@@ -61,13 +61,13 @@ func (o *OSSObject) ReadImage(client *oss.Client) (*image.Image, error) {
  * @Param: client *oss.Client, buckName, directory string
  * @Return: *[]OSSObject, error
  **/
-func OSSListObject(client *oss.Client, buckName, directory string) (*[]OSSObject, error) {
+func OSSListObject(client *oss.Client, buckName, directory string) ([]*OSSObject, error) {
 	// Create the Paginator for the ListObjectsV2 operation.
 	p := client.NewListObjectsV2Paginator(&oss.ListObjectsV2Request{
 		Bucket: oss.Ptr(buckName),
 		Prefix: oss.Ptr(directory),
 	})
-	var objects []OSSObject
+	var objects []*OSSObject
 	// Iterate through the object pages
 	for p.HasNext() {
 		page, err := p.NextPage(context.TODO())
@@ -84,7 +84,7 @@ func OSSListObject(client *oss.Client, buckName, directory string) (*[]OSSObject
 				// 应该是文件夹，跳过
 				continue
 			}
-			objs := OSSObject{
+			objs := &OSSObject{
 				BuckName:     buckName,
 				Key:          key,
 				Filename:     ExtractOSSFilename(key),
@@ -94,7 +94,7 @@ func OSSListObject(client *oss.Client, buckName, directory string) (*[]OSSObject
 			objects = append(objects, objs)
 		}
 	}
-	return &objects, nil
+	return objects, nil
 }
 
 /**
